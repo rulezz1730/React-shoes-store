@@ -1,8 +1,8 @@
 import React from "react";
 
-const CartDrawer = () => {
+const CartDrawer = ({ onCloseCart, addedItems = [] }) => {
     return (
-        <div style={{ display: "none" }} className="overlay">
+        <div className="overlay">
             <div className="drawer">
                 <h2 className="d-flex justify-between align-center">
                     Корзина{" "}
@@ -10,69 +10,35 @@ const CartDrawer = () => {
                         className="removeBtn  cu-p"
                         src="img/btn-remove.svg"
                         alt="Remove"
+                        onClick={onCloseCart}
                     />
                 </h2>
-                <div class="items">
-                    <div className="cartItem d-flex align-center">
-                        <img
-                            className="mr-20"
-                            width={70}
-                            height={70}
-                            src="img/items/1.png"
-                            alt="Sneakers"
-                        />
-                        <div className="mr-20">
-                            <p className="mb-5">
-                                Мужские Кроссовки Nike Blazer Mid Suede
-                            </p>
-                            <b>12000 руб.</b>
-                        </div>
-                        <img
-                            className="removeBtn"
-                            src="img/btn-remove.svg"
-                            alt="Remove"
-                        />
-                    </div>
-                    <div className="cartItem d-flex align-center">
-                        <img
-                            className="mr-20"
-                            width={70}
-                            height={70}
-                            src="img/items/1.png"
-                            alt="Sneakers"
-                        />
-                        <div className="mr-20">
-                            <p className="mb-5">
-                                Мужские Кроссовки Nike Blazer Mid Suede
-                            </p>
-                            <b>12000 руб.</b>
-                        </div>
-                        <img
-                            className="removeBtn"
-                            src="img/btn-remove.svg"
-                            alt="Remove"
-                        />
-                    </div>
-                    <div className="cartItem d-flex align-center">
-                        <img
-                            className="mr-20"
-                            width={70}
-                            height={70}
-                            src="img/items/1.png"
-                            alt="Sneakers"
-                        />
-                        <div className="mr-20">
-                            <p className="mb-5">
-                                Мужские Кроссовки Nike Blazer Mid Suede
-                            </p>
-                            <b>12000 руб.</b>
-                        </div>
-                        <img
-                            className="removeBtn"
-                            src="img/btn-remove.svg"
-                            alt="Remove"
-                        />
-                    </div>
+                <div className="items">
+                    {addedItems.map((item) => {
+                        return (
+                            <div
+                                className="cartItem d-flex align-center"
+                                key={item.id}
+                            >
+                                <img
+                                    className="mr-20"
+                                    width={70}
+                                    height={70}
+                                    src={item.img}
+                                    alt="Sneakers"
+                                />
+                                <div className="mr-20">
+                                    <p className="mb-5">{item.title}</p>
+                                    <b>{item.price} руб.</b>
+                                </div>
+                                <img
+                                    className="removeBtn"
+                                    src="img/btn-remove.svg"
+                                    alt="Remove"
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
 
                 <div className="cartTotalBlock">
