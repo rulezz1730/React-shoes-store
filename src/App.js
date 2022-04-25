@@ -6,6 +6,7 @@ import Header from "./components/Header";
 function App() {
     const [items, setItems] = useState([]);
     const [cartItems, setCartItems] = useState([]);
+    const [filtredItem, setFiltredItem] = useState("");
     const [isCartOpened, setCartOpened] = useState(false);
     const [isFavourite, setFavourite] = useState(false);
 
@@ -34,6 +35,10 @@ function App() {
         setCartOpened(!isCartOpened);
     };
 
+    const handleChangeSearchInput = (event) => {
+        setFiltredItem(event.target.value);
+    };
+
     return (
         <div className="wrapper clear">
             {isCartOpened && (
@@ -48,22 +53,42 @@ function App() {
                     <h1>Все кроссовки</h1>
                     <div className="search-block d-flex">
                         <img src="img/search.svg" alt="Search" />
-                        <input placeholder="Поиск" />
+                        <input
+                            placeholder="Поиск"
+                            onChange={handleChangeSearchInput}
+                            value={filtredItem}
+                        />
+                        {filtredItem && (
+                            <img
+                                width={20}
+                                height={20}
+                                className="removeBtn  cu-p"
+                                src="img/btn-remove.svg"
+                                alt="Clear"
+                                onClick={() => setFiltredItem("")}
+                            />
+                        )}
                     </div>
                 </div>
 
                 <div className="d-flex flex-wrap">
-                    {items.map((item) => (
-                        <Card
-                            key={item.id}
-                            title={item.title}
-                            price={item.price}
-                            imgUrl={item.img}
-                            onAddCart={() => handlePlusItem(item)}
-                            onAddFavourite={handleAddFavourite}
-                            id={item.id}
-                        />
-                    ))}
+                    {items
+                        .filter((item) =>
+                            item.title
+                                .toLowerCase()
+                                .includes(filtredItem.toLowerCase())
+                        )
+                        .map((item) => (
+                            <Card
+                                key={item.id}
+                                title={item.title}
+                                price={item.price}
+                                imgUrl={item.img}
+                                onAddCart={() => handlePlusItem(item)}
+                                onAddFavourite={handleAddFavourite}
+                                id={item.id}
+                            />
+                        ))}
                 </div>
             </div>
         </div>
