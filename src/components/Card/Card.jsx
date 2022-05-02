@@ -1,18 +1,25 @@
 import React, { useState } from "react";
 import styles from "./Card.module.scss";
 
-const Card = ({ title, price, imgUrl, onAddCart, onAddFavourite, id }) => {
+const Card = ({
+    title,
+    price,
+    img,
+    onAddCart,
+    onAddFavourite,
+    isFavourite = false,
+}) => {
     const [isAdded, setAdded] = useState(false);
-    const [isFavourite, setFavourite] = useState(false);
+    const [isAddedFavourite, setAddedFavourite] = useState(isFavourite);
 
     const handleAddCart = () => {
         setAdded(!isAdded);
         onAddCart();
     };
 
-    const handleAddFavourite = (event) => {
+    const handleAddFavourite = () => {
         onAddFavourite();
-        setFavourite(!isFavourite);
+        setAddedFavourite(!isFavourite);
     };
 
     return (
@@ -23,14 +30,14 @@ const Card = ({ title, price, imgUrl, onAddCart, onAddFavourite, id }) => {
             >
                 <img
                     src={
-                        isFavourite
+                        isAddedFavourite
                             ? "img/item-liked.svg"
                             : "img/item-unliked.svg"
                     }
                     alt="Unliked"
                 />
             </div>
-            <img width={133} height={112} src={imgUrl} alt="item" />
+            <img width={133} height={112} src={img} alt="item" />
             <h5 className="mb-30">{title}</h5>
             <div className="cardBottom d-flex justify-between align-center">
                 <div className="d-flex flex-column">
