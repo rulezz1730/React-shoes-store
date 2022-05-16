@@ -14,12 +14,10 @@ const favouritesService = {
 
     get: async () => {
         const { data } = await httpService.get(favouritesEndPoint);
-        console.log(data);
         return data;
     },
 
     delete: async (id) => {
-        console.log(favouritesEndPoint + id);
         const { data } = await httpService.delete(favouritesEndPoint + id);
         console.log(data);
         return data;

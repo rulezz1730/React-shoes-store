@@ -1,10 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "../hooks/useCart";
 
 const Header = ({ onClickCart }) => {
+    const { totalPrice } = useCart();
     const handleClickCart = () => {
         onClickCart();
-        console.log("Open cart");
     };
 
     return (
@@ -20,17 +21,17 @@ const Header = ({ onClickCart }) => {
                 </div>
             </Link>
             <ul className="d-flex headerRight">
-                <Link to="/cart">
-                    <li className="mr-30 cu-p" onClick={handleClickCart}>
-                        <img
-                            width={20}
-                            height={20}
-                            src="img/cart.svg"
-                            alt="Корзина"
-                        />
-                        <span>1205 руб.</span>
-                    </li>
-                </Link>
+                <li className="mr-30 cu-p" onClick={handleClickCart}>
+                    <img
+                        width={20}
+                        height={20}
+                        src="img/cart.svg"
+                        alt="Корзина"
+                    />
+                    <span>
+                        <b>{totalPrice} руб.</b>
+                    </span>
+                </li>
                 <li className="mr-10 cu-p">
                     <Link to="/favourites">
                         <img
@@ -42,12 +43,14 @@ const Header = ({ onClickCart }) => {
                     </Link>
                 </li>
                 <li className="cu-p">
-                    <img
-                        width={20}
-                        height={20}
-                        src="img/user.svg"
-                        alt="Пользователь"
-                    />
+                    <Link to="/orders">
+                        <img
+                            width={20}
+                            height={20}
+                            src="img/user.svg"
+                            alt="Пользователь"
+                        />
+                    </Link>
                 </li>
             </ul>
         </header>

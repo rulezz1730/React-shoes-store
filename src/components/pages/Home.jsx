@@ -1,16 +1,32 @@
 import React, { useEffect } from "react";
-import cartService from "../../service/cart.service";
-import itemService from "../../service/item.service";
 import Card from "../Card/Card";
 
 const Home = ({
     items,
-    filtredItem,
-    setFiltredItem,
-    handleChangeSearchInput,
-    handleAddFavourite,
-    handlePlusItem,
+    searchValue,
+    setSearchValue,
+    onChangeSearchInput,
+    onAddToFavorite,
+    onAddToCart,
+    isLoading,
 }) => {
+    const renderItems = () => {
+        const filtredItems = items.filter((item) =>
+            item.title.toLowerCase().includes(searchValue.toLowerCase())
+        );
+        return (isLoading ? [...Array(12)] : filtredItems).map(
+            (item, index) => (
+                <Card
+                    key={index}
+                    onFavorite={(obj) => onAddToFavorite(obj)}
+                    onPlus={(obj) => onAddToCart(obj)}
+                    loading={isLoading}
+                    {...item}
+                />
+            )
+        );
+    };
+
     return (
         <div className="content p-40">
             <div className="d-flex mb-40 align-center justify-between flex-wrap">
@@ -19,42 +35,22 @@ const Home = ({
                     <img src="img/search.svg" alt="Search" />
                     <input
                         placeholder="Поиск"
-                        onChange={handleChangeSearchInput}
-                        value={filtredItem}
+                        onChange={onChangeSearchInput}
+                        value={searchValue}
                     />
-                    {filtredItem && (
+                    {searchValue && (
                         <img
                             width={20}
                             height={20}
                             className="removeBtn  cu-p"
                             src="img/btn-remove.svg"
                             alt="Clear"
-                            onClick={() => setFiltredItem("")}
+                            onClick={() => setSearchValue("")}
                         />
                     )}
                 </div>
             </div>
-
-            <div className="d-flex flex-wrap">
-                {items
-                    .filter((item) =>
-                        item.title
-                            .toLowerCase()
-                            .includes(filtredItem.toLowerCase())
-                    )
-                    .map((item, index) => (
-                        <Card
-                            key={index}
-                            // title={item.title}
-                            // price={item.price}
-                            // img={item.img}
-                            onAddCart={() => handlePlusItem(item)}
-                            onAddFavourite={() => handleAddFavourite(item)}
-                            id={index}
-                            {...item}
-                        />
-                    ))}
-            </div>
+            <div className="d-flex flex-wrap">{renderItems()}</div>
         </div>
     );
 };

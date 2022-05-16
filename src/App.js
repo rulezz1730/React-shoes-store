@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
-// import Card from "./components/Card/Card";
-import CartDrawer from "./components/CartDrawer";
+import React, { useState, useEffect } from "react";
+import CartDrawer from "./components/CartDrawer/CartDrawer";
 import Header from "./components/Header";
 import cartService from "./service/cart.service";
 import itemService from "./service/item.service";
@@ -8,141 +7,150 @@ import favouritesService from "./service/favourites.service";
 import { Route, Routes } from "react-router-dom";
 import Home from "./components/pages/Home";
 import Favourites from "./components/pages/Favourites";
-import httpService from "./service/http.service";
+import AppContext from "./AppContext";
+import Orders from "./components/pages/Orders";
 
 function App() {
     const [items, setItems] = useState([]);
     const [cartItems, setCartItems] = useState([]);
-    const [filtredItem, setFiltredItem] = useState("");
-    const [favouritesItems, setFavouriteItems] = useState([]);
-    const [isCartOpened, setCartOpened] = useState(false);
-    const [isFavourite, setFavourite] = useState(false);
+    const [favorites, setFavorites] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
+    const [cartOpened, setCartOpened] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        itemService.get().then((res) => setItems(res));
-        cartService.get().then((res) => setCartItems(res));
-        favouritesService.get().then((res) => setFavouriteItems(res));
+        async function fetchData() {
+            try {
+                await itemService.get().then((res) => setItems(res));
+                await cartService.get().then((res) => setCartItems(res));
+                await favouritesService.get().then((res) => setFavorites(res));
+                setIsLoading(false);
+            } catch (error) {
+                alert("Ошибка при запросе данных ;(");
+                console.error(error);
+            }
+        }
+        fetchData();
     }, []);
 
-    const handlePlusItem = async (item) => {
-        await cartService.post(item);
-        await cartService.get().then((res) => setCartItems(res));
-    };
-
-    const handleAddFavourite = async (item) => {
+    const onAddToCart = async (obj) => {
         try {
-            if (favouritesItems.find((el) => el.id === item.id)) {
-                favouritesService.delete(item.id);
+            const findItem = cartItems.find(
+                (item) => Number(item.parentId) === Number(obj.id)
+            );
+            if (findItem) {
+                setCartItems((prev) =>
+                    prev.filter(
+                        (item) => Number(item.parentId) !== Number(obj.id)
+                    )
+                );
+                await cartService.delete(findItem.id);
             } else {
-                const data = await favouritesService.post({
-                    ...item,
-                    isFavourite: true,
-                });
-                setFavouriteItems((prevState) => [...prevState, data]);
+                setCartItems((prev) => [...prev, obj]);
+                const data = await cartService.post(obj);
+                setCartItems((prev) =>
+                    prev.map((item) => {
+                        if (item.parentId === data.parentId) {
+                            return {
+                                ...item,
+                                id: data.id,
+                            };
+                        }
+                        return item;
+                    })
+                );
             }
         } catch (error) {
-            alert("Не удалось добавить в Избранное!");
+            alert("Ошибка при добавлении в корзину");
+            console.error(error);
         }
     };
 
-    const handleCloseCart = () => {
-        setCartOpened(!isCartOpened);
+    const onRemoveItem = (id) => {
+        try {
+            cartService.delete(id);
+            setCartItems((prev) =>
+                prev.filter((item) => Number(item.id) !== Number(id))
+            );
+        } catch (error) {
+            alert("Ошибка при удалении из корзины");
+            console.error(error);
+        }
     };
 
-    const handleOpenCart = () => {
-        setCartOpened(!isCartOpened);
+    const onAddToFavorite = async (obj) => {
+        try {
+            if (
+                favorites.find((favObj) => Number(favObj.id) === Number(obj.id))
+            ) {
+                favouritesService.delete(obj.id);
+                setFavorites((prev) =>
+                    prev.filter((item) => Number(item.id) !== Number(obj.id))
+                );
+            } else {
+                const data = favouritesService.post(obj);
+                setFavorites((prev) => [...prev, data]);
+            }
+        } catch (error) {
+            alert("Не удалось добавить в фавориты");
+            console.error(error);
+        }
     };
 
-    const handleChangeSearchInput = (event) => {
-        setFiltredItem(event.target.value);
+    const onChangeSearchInput = (event) => {
+        setSearchValue(event.target.value);
     };
 
-    const handleRemoveCartItem = (cartId) => {
-        cartService.delete(cartId);
-        setCartItems((prevState) => prevState.filter((el) => el.id !== cartId));
+    const isItemAdded = (id) => {
+        return cartItems.some((obj) => Number(obj.parentId) === Number(id));
     };
 
     return (
-        <div className="wrapper clear">
-            {isCartOpened && (
-                <CartDrawer
-                    onCloseCart={handleCloseCart}
-                    addedItems={cartItems}
-                    onRemoveItem={handleRemoveCartItem}
-                />
-            )}
+        <AppContext.Provider
+            value={{
+                items,
+                cartItems,
+                favorites,
+                isItemAdded,
+                onAddToFavorite,
+                onAddToCart,
+                setCartOpened,
+                setCartItems,
+            }}
+        >
+            <div className="wrapper clear">
+                {cartOpened && (
+                    <CartDrawer
+                        items={cartItems}
+                        onClose={() => setCartOpened(false)}
+                        onRemove={onRemoveItem}
+                        opened={cartOpened}
+                        onAddToCart={onAddToCart}
+                    />
+                )}
 
-            <Header onClickCart={handleOpenCart} />
-            <Routes>
-                <Route
-                    index
-                    path="/"
-                    element={
-                        <Home
-                            items={items}
-                            filtredItem={filtredItem}
-                            setFiltredItem={setFiltredItem}
-                            handleChangeSearchInput={handleChangeSearchInput}
-                            handleAddFavourite={handleAddFavourite}
-                            handlePlusItem={handlePlusItem}
-                        />
-                    }
-                />
-                <Route
-                    index
-                    path="/favourites"
-                    element={
-                        <Favourites
-                            favouritesItems={favouritesItems}
-                            handleAddFavourite={handleAddFavourite}
-                        />
-                    }
-                />
-            </Routes>
-            {/* <div className="content p-40">
-                <div className="d-flex mb-40 align-center justify-between flex-wrap">
-                    <h1>Все кроссовки</h1>
-                    <div className="search-block d-flex">
-                        <img src="img/search.svg" alt="Search" />
-                        <input
-                            placeholder="Поиск"
-                            onChange={handleChangeSearchInput}
-                            value={filtredItem}
-                        />
-                        {filtredItem && (
-                            <img
-                                width={20}
-                                height={20}
-                                className="removeBtn  cu-p"
-                                src="img/btn-remove.svg"
-                                alt="Clear"
-                                onClick={() => setFiltredItem("")}
+                <Header onClickCart={() => setCartOpened(true)} />
+                <Routes>
+                    <Route
+                        path="/"
+                        element={
+                            <Home
+                                items={items}
+                                cartItems={cartItems}
+                                searchValue={searchValue}
+                                setSearchValue={setSearchValue}
+                                onChangeSearchInput={onChangeSearchInput}
+                                onAddToFavorite={onAddToFavorite}
+                                onAddToCart={onAddToCart}
+                                isLoading={isLoading}
                             />
-                        )}
-                    </div>
-                </div>
-
-                <div className="d-flex flex-wrap">
-                    {items
-                        .filter((item) =>
-                            item.title
-                                .toLowerCase()
-                                .includes(filtredItem.toLowerCase())
-                        )
-                        .map((item, index) => (
-                            <Card
-                                key={index}
-                                title={item.title}
-                                price={item.price}
-                                imgUrl={item.img}
-                                onAddCart={() => handlePlusItem(item)}
-                                onAddFavourite={() => handleAddFavourite(item)}
-                                id={index}
-                            />
-                        ))}
-                </div>
-            </div> */}
-        </div>
+                        }
+                    />
+                    <Route index path="/favourites" element={<Favourites />} />
+                    <Route index path="/orders" element={<Orders />} />
+                </Routes>
+            </div>
+        </AppContext.Provider>
     );
 }
 

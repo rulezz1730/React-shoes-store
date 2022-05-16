@@ -1,7 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useContext } from "react";
 import Card from "../Card/Card";
+import AppContext from "../../AppContext";
 
-const Favourites = ({ favouritesItems, handleAddFavourite }) => {
+const Favourites = ({ onAddToCart }) => {
+    const { favorites, onAddToFavorite } = useContext(AppContext);
+
     return (
         <div className="content p-40">
             <div className="d-flex mb-40 align-center justify-between flex-wrap">
@@ -9,17 +12,15 @@ const Favourites = ({ favouritesItems, handleAddFavourite }) => {
             </div>
 
             <div className="d-flex flex-wrap">
-                <div className="d-flex flex-wrap">
-                    {favouritesItems.map((item, index) => (
-                        <Card
-                            key={index}
-                            onAddFavourite={() => handleAddFavourite(item)}
-                            id={index}
-                            isFavourite={item.isFavourite}
-                            {...item}
-                        />
-                    ))}
-                </div>
+                {favorites.map((item, index) => (
+                    <Card
+                        key={index}
+                        favorited={true}
+                        onFavorite={onAddToFavorite}
+                        onPlus={(item) => onAddToCart(item)}
+                        {...item}
+                    />
+                ))}
             </div>
         </div>
     );
