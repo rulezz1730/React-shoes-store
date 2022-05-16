@@ -1,6 +1,6 @@
 import httpService from "./http.service";
 
-const ordersEndPoint = "orders/";
+const ordersEndPoint = "orders";
 
 const ordersService = {
     post: async (obj) => {

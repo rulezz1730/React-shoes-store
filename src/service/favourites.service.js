@@ -1,6 +1,6 @@
 import httpService from "./http.service";
 
-const favouritesEndPoint = "favourites/";
+const favouritesEndPoint = "favourites";
 
 const favouritesService = {
     post: async (favouriteItem) => {
